@@ -35,7 +35,7 @@ app.post("/participants", async (req, res) => {
             { name },
             { abortEarly: false }
         );
-        if(error){
+        if (error) {
             const messageError = error.details.map((details) => details.message)
             return res.status(422).send(messageError)
         }
@@ -58,8 +58,9 @@ app.post("/participants", async (req, res) => {
         }
         await participantsCollection.insertOne({ name, lastStatus: Date.now() })
         await messagesCollecition.insertOne({ messageLogin })
-        // const teste = participantsCollection.find().toArray()
-        // console.log(teste)
+        // const teste1 = await participantsCollection.find().toArray()
+        // const teste2 = await messagesCollecition.find().toArray()
+        // console.log(teste1, teste2)
         res.sendStatus(201)
     } catch (err) {
         console.log(err)
@@ -67,6 +68,15 @@ app.post("/participants", async (req, res) => {
     }
 }
 )
+app.get("/participants", async (req, res) => {
+    try {
+        const participantsList = await participantsCollection.find({}).toArray()
+        return res.status(200).send(participantsList)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send("Não funcionou")
+    }
 
+})
 const PORT = 5000
 app.listen(PORT, () => console.log(`Server running in port: ${PORT}`))
