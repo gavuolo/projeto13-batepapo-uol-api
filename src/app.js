@@ -25,13 +25,30 @@ try {
 
 app.post("/participants", async (req, res) => {
     const { name } = req.body
-    //falta fazer validação com joi
-    //falta laststatus
+    //validação JOI
+    const participantSchema = joi.object({
+        name: joi.string().required()
+    })
+
+    try {
+        const { error } = participantSchema.validate(
+            { name },
+            { abortEarly: false }
+        );
+        if(error){
+            const messageError = error.details.map((details) => details.message)
+            return res.status(422).send(messageError)
+        }
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+    // --------
     const messageLogin = {
         from: name,
         to: "Todos",
         text: "Entrou na sala...",
-        type:  "status",
+        type: "status",
         time: dayjs().format("HH:mm:ss")
     }
     try {
@@ -39,9 +56,10 @@ app.post("/participants", async (req, res) => {
         if (participantExist) {
             return res.status(409).send("Este usuário já existe")
         }
-        await db.collection("participants").insertOne({ name })
-        await db.collection("messages").insertOne({ messageLogin })
-        // console.log(messageLogin)
+        await participantsCollection.insertOne({ name, lastStatus: Date.now() })
+        await messagesCollecition.insertOne({ messageLogin })
+        // const teste = participantsCollection.find().toArray()
+        // console.log(teste)
         res.sendStatus(201)
     } catch (err) {
         console.log(err)
