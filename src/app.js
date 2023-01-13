@@ -117,7 +117,16 @@ app.post("/messages", async (req, res) => {
     }
 })
 app.get("/messages", async (req, res) => {
+    //limitar para 50 mensagens com query string
+    const { limit } = req.query
 
+    try {
+        const messageList = await messagesCollecition.find({}).toArray()
+        return res.status(200).send(messageList.slice(-limit))
+    } catch (err) {
+        console.log(err)
+        res.status(500).send("Não funcionou")
+    }
 })
 app.post("/status", async (req, res) => {
 
