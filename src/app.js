@@ -25,7 +25,6 @@ try {
 
 app.post("/participants", async (req, res) => {
     const { name } = req.body
-    //validação JOI
     const participantSchema = joi.object({
         name: joi.string().required()
     })
@@ -58,9 +57,6 @@ app.post("/participants", async (req, res) => {
         }
         await participantsCollection.insertOne({ name, lastStatus: Date.now() })
         await messagesCollecition.insertOne({ messageLogin })
-        // const teste1 = await participantsCollection.find().toArray()
-        // const teste2 = await messagesCollecition.find().toArray()
-        // console.log(teste1, teste2)
         res.sendStatus(201)
     } catch (err) {
         console.log(err)
@@ -76,6 +72,36 @@ app.get("/participants", async (req, res) => {
         console.log(err)
         res.status(500).send("Não funcionou")
     }
+
+})
+app.post("/messages", async (req, res) => {
+    const { text, type, to } = req.body
+    const user = req.headers.user //mandado pelo front
+    const body = {
+        from: user,
+        to: to,
+        text: text,
+        type: type,
+        time: dayjs().format("HH:mm:ss")
+    }
+    const messageSchema = joi.object({
+        to: joi.string().required(),
+        text: joi.string().required(),
+        type: joi.string().valid("message", "private_message")
+    })
+
+    try{
+        await messagesCollecition.insertOne(body)
+        res.sendStatus(201)
+    } catch (err){
+        console.log(err)
+        res.sendStatus(500)
+    }
+})
+app.get("/messages", async (req, res) => {
+
+})
+app.post("/status", async (req, res) => {
 
 })
 const PORT = 5000
