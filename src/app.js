@@ -100,9 +100,9 @@ app.post("/messages", async (req, res) => {
     }
     //participante existente
     const participantExist = await participantsCollection.findOne({
-      name: user,
+      name: to,
     });
-    if (participantExist === null) {
+    if (participantExist === null && body.to != "Todos") {
       return res.status(422).send("usuário n existe");
     }
   } catch (err) {
@@ -126,10 +126,15 @@ app.get("/messages", async (req, res) => {
     const messageList = await messagesCollecition.find({}).toArray();
     const filterMessage = messageList.filter((item) => {
       return (
-        item.to === "todos" || item.from === user || item.to === user
+        item.to === "todos" ||
+        item.from === user ||
+        item.to === user ||
+        item.type === "message"
       );
     });
     return res.status(200).send(filterMessage.slice(limitMessage));
+
+    //
   } catch (err) {
     console.log(err);
     res.status(500).send("Não funcionou");
