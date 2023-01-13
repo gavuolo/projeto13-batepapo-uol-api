@@ -75,8 +75,8 @@ app.get("/participants", async (req, res) => {
 
 })
 app.post("/messages", async (req, res) => {
+    const { user } = req.headers //mandado pelo front
     const { text, type, to } = req.body
-    const user = req.headers.user //mandado pelo front
     const body = {
         from: user,
         to: to,
@@ -89,11 +89,29 @@ app.post("/messages", async (req, res) => {
         text: joi.string().required(),
         type: joi.string().valid("message", "private_message")
     })
+    //validação mensagem
+    try {
+        const { error } = messageSchema.validate(
+            { to, text, type }, { abortEarly: false }
+        )
+        if (error) {
+            const message = error.details.map((detail) => detail.message)
+            return res.status(422).send(message)
+        }
+        //participante existente
+        const participantExist = await participantsCollection.findOne({ name: from })
+        if (participantExist === null) {
+            return res.sendStatus(422);
+        }
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
 
-    try{
+    try {
         await messagesCollecition.insertOne(body)
         res.sendStatus(201)
-    } catch (err){
+    } catch (err) {
         console.log(err)
         res.sendStatus(500)
     }
