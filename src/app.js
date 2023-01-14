@@ -86,25 +86,27 @@ app.post("/messages", async (req, res) => {
   const messageSchema = joi.object({
     to: joi.string().required(),
     text: joi.string().required(),
-    type: joi.string().valid("message", "private_message"),
+    type: joi.string().required().valid("message", "private_message")
   });
-  //validação mensagem
+  const { error } = messageSchema.validate(
+    { to, text, type },
+    { abortEarly: false }
+  );
+   
+  if (error) {
+    const message = error.details.map((detail) => detail.message);
+    return res.status(422).send(message);
+  }
   try {
-    const { error } = messageSchema.validate(
-      { to, text, type },
-      { abortEarly: false }
-    );
-    if (error) {
-      const message = error.details.map((detail) => detail.message);
-      return res.status(422).send(message);
-    }
-    //participante existente
     const participantExist = await participantsCollection.findOne({
-      name: to,
+      name: user,
     });
-    if (participantExist === null && body.to != "Todos") {
-      return res.status(422).send("usuário n existe");
-    }
+     if (participantExist === null && body.to != "Todos") {
+       return res.sendStatus(422);
+     }
+     if(!user){
+       return res.sendStatus(422);
+     }
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
@@ -129,7 +131,8 @@ app.get("/messages", async (req, res) => {
         item.to === "todos" ||
         item.from === user ||
         item.to === user ||
-        item.type === "message"
+        item.type === "message" 
+        // item.type === "private_message"
       );
     });
     return res.status(200).send(filterMessage.slice(limitMessage));
