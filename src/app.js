@@ -126,6 +126,9 @@ app.get("/messages", async (req, res) => {
   const { limit } = req.query;
   const { user } = req.headers;
   const limitMessage = parseInt(limit) * -1;
+  if(limit == 0 || Math.sign(limit) === -1 ){
+    return res.sendStatus(422)
+  }
   try {
     const messageList = await messagesCollecition.find({}).toArray();
     const filterMessage = messageList.filter((item) => {
