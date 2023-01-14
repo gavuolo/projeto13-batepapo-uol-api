@@ -101,7 +101,7 @@ app.post("/messages", async (req, res) => {
     const participantExist = await participantsCollection.findOne({
       name: user,
     });
-     if (participantExist === null && body.to != "Todos") {
+     if (participantExist === null) {
        return res.sendStatus(422);
      }
      if(!user){
