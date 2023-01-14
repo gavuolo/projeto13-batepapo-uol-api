@@ -126,8 +126,7 @@ app.get("/messages", async (req, res) => {
   const { limit } = req.query;
   const { user } = req.headers;
   const limitMessage = parseInt(limit) * -1;
-
-  if (limit == 0 || Math.sign(limit) === -1 || isNaN(limit)) {
+  if (limit == 0 || Math.sign(limit) === -1 || isNaN(limit) && limit != undefined) {
     return res.sendStatus(422);
   }
   try {
