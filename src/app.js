@@ -100,10 +100,11 @@ app.post("/messages", async (req, res) => {
       return res.status(422).send(message);
     }
     const participantExist = await participantsCollection.findOne({
-      user
+      name: user
     });
+    console.log(participantExist)
     if (participantExist === null) {
-      return res.sendStatus(422);
+      return res.status(422).send("usuário não existe");
     }
     if (!user) {
       return res.sendStatus(422);
