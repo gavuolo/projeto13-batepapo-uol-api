@@ -130,7 +130,7 @@ app.get("/messages", async (req, res) => {
     const messageList = await messagesCollecition.find({}).toArray();
     const filterMessage = messageList.filter((item) => {
       return (
-        item.to === "todos" ||
+        item.to === "Todos" ||
         item.from === user ||
         item.to === user ||
         item.type === "message"
@@ -138,7 +138,6 @@ app.get("/messages", async (req, res) => {
     });
     return res.status(200).send(filterMessage.slice(limitMessage));
 
-    //
   } catch (err) {
     console.log(err);
     res.status(500).send("Não funcionou");
@@ -150,7 +149,6 @@ app.post("/status", async (req, res) => {
     const participantOnline = await participantsCollection.findOne({
       user
     });
-    console.log(participantOnline);
     if(!participantOnline){
       return res.sendStatus(404)
     }
@@ -158,6 +156,8 @@ app.post("/status", async (req, res) => {
       { name: user },
       { $set: { lastStatus: Date.now() } }
     );
+    const teste = await participantsCollection.find({}).toArray()
+    console.log(teste)
     res.sendStatus(200);
   } catch (err) {
     console.log(err);
