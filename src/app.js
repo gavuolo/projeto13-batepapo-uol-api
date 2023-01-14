@@ -74,7 +74,7 @@ app.get("/participants", async (req, res) => {
   }
 });
 app.post("/messages", async (req, res) => {
-  const { user } = req.headers; //mandado pelo front
+  const { user } = req.headers;
   const { text, type, to } = req.body;
   const body = {
     from: user,
@@ -100,9 +100,9 @@ app.post("/messages", async (req, res) => {
       return res.status(422).send(message);
     }
     const participantExist = await participantsCollection.findOne({
-      name: user
+      name: user,
     });
-    console.log(participantExist)
+    console.log(participantExist);
     if (participantExist === null) {
       return res.status(422).send("usuário não existe");
     }
@@ -126,8 +126,9 @@ app.get("/messages", async (req, res) => {
   const { limit } = req.query;
   const { user } = req.headers;
   const limitMessage = parseInt(limit) * -1;
-  if(limit == 0 || Math.sign(limit) === -1 ){
-    return res.sendStatus(422)
+
+  if (limit == 0 || Math.sign(limit) === -1 || isNaN(limit)) {
+    return res.sendStatus(422);
   }
   try {
     const messageList = await messagesCollecition.find({}).toArray();
@@ -140,31 +141,28 @@ app.get("/messages", async (req, res) => {
       );
     });
     return res.status(200).send(filterMessage.slice(limitMessage));
-
   } catch (err) {
     console.log(err);
-    res.status(500).send("Não funcionou");
+    res.sendStatus(500);
   }
 });
 app.post("/status", async (req, res) => {
-  const { user } = req.header;
+  const { user } = req.headers;
   try {
     const participantOnline = await participantsCollection.findOne({
-      user
+      name: user,
     });
-    if(!participantOnline){
-      return res.sendStatus(404)
+    if (!participantOnline) {
+      return res.sendStatus(404);
     }
     await participantsCollection.updateOne(
       { name: user },
       { $set: { lastStatus: Date.now() } }
     );
-    const teste = await participantsCollection.find({}).toArray()
-    console.log(teste)
     res.sendStatus(200);
   } catch (err) {
     console.log(err);
-    res.sendStatus(500)
+    res.sendStatus(500);
   }
 });
 const PORT = 5000;
