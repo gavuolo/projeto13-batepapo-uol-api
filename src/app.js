@@ -86,27 +86,28 @@ app.post("/messages", async (req, res) => {
   const messageSchema = joi.object({
     to: joi.string().required(),
     text: joi.string().required(),
-    type: joi.string().required().valid("message", "private_message")
+    type: joi.string().required().valid("message", "private_message"),
   });
-  const { error } = messageSchema.validate(
-    { to, text, type },
-    { abortEarly: false }
-  );
-   
-  if (error) {
-    const message = error.details.map((detail) => detail.message);
-    return res.status(422).send(message);
-  }
+
   try {
+    const { error } = messageSchema.validate(
+      { to, text, type },
+      { abortEarly: false }
+    );
+
+    if (error) {
+      const message = error.details.map((detail) => detail.message);
+      return res.status(422).send(message);
+    }
     const participantExist = await participantsCollection.findOne({
-      name: user,
+      user
     });
-     if (participantExist === null) {
-       return res.sendStatus(422);
-     }
-     if(!user){
-       return res.sendStatus(422);
-     }
+    if (participantExist === null) {
+      return res.sendStatus(422);
+    }
+    if (!user) {
+      return res.sendStatus(422);
+    }
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
@@ -131,8 +132,7 @@ app.get("/messages", async (req, res) => {
         item.to === "todos" ||
         item.from === user ||
         item.to === user ||
-        item.type === "message" 
-        // item.type === "private_message"
+        item.type === "message"
       );
     });
     return res.status(200).send(filterMessage.slice(limitMessage));
@@ -143,6 +143,25 @@ app.get("/messages", async (req, res) => {
     res.status(500).send("Não funcionou");
   }
 });
-app.post("/status", async (req, res) => {});
+app.post("/status", async (req, res) => {
+  const { user } = req.header;
+  try {
+    const participantOnline = await participantsCollection.findOne({
+      user
+    });
+    console.log(participantOnline);
+    if(!participantOnline){
+      return res.sendStatus(404)
+    }
+    await participantsCollection.updateOne(
+      { name: user },
+      { $set: { lastStatus: Date.now() } }
+    );
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500)
+  }
+});
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running in port: ${PORT}`));
