@@ -77,10 +77,10 @@ app.post("/messages", async (req, res) => {
   const { user } = req.headers;
   const { text, type, to } = req.body;
   const body = {
-    from: user,
     to: to,
     text: text,
     type: type,
+    from: user,
     time: dayjs().format("HH:mm:ss"),
   };
   const messageSchema = joi.object({
@@ -184,3 +184,4 @@ async function removeParticipants(){
 setInterval(removeParticipants, 15000);
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running in port: ${PORT}`));
+
