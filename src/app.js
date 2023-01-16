@@ -164,5 +164,23 @@ app.post("/status", async (req, res) => {
     res.sendStatus(500);
   }
 });
+async function removeParticipants(){
+  const participantOnline = await participantsCollection.find({}).toArray();
+  const timeNow = Date.now();
+  participantOnline.map((participants) =>{
+    if(participants.lastStatus < timeNow - 10000){
+      participantsCollection.deleteMany(participants)
+      const logoutMessage = {
+        from: participants.name, 
+        to: 'Todos', 
+        text: 'sai da sala...', 
+        type: 'status', 
+        time: dayjs().format("HH:mm:ss")
+      }
+      messagesCollecition.insertOne(logoutMessage)
+    }
+  })
+}
+setInterval(removeParticipants, 15000);
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running in port: ${PORT}`));
