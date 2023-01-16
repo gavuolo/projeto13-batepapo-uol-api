@@ -102,7 +102,6 @@ app.post("/messages", async (req, res) => {
     const participantExist = await participantsCollection.findOne({
       name: user,
     });
-    console.log(participantExist);
     if (participantExist === null) {
       return res.status(422).send("usuário não existe");
     }
@@ -130,7 +129,7 @@ app.get("/messages", async (req, res) => {
     return res.sendStatus(422);
   }
   try {
-    const messageList = await messagesCollecition.find({}).toArray();
+    const messageList = await messagesCollecition.aggregate([{$project: {_id: 0, to: 1, text: 1, type: 1, from: 1}}]).toArray();
     const filterMessage = messageList.filter((item) => {
       return (
         item.to === "Todos" ||
